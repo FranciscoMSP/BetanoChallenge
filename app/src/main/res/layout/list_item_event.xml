@@ -9,7 +9,7 @@
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="80dp"
+        android:layout_width="116dp"
         android:layout_height="match_parent"
         android:background="@color/color_1c2026"
         android:paddingStart="8dp"
@@ -20,9 +20,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
+            android:background="@drawable/border_light_gray_round"
             android:textColor="@color/white"
             android:textSize="12sp"
-            android:background="@drawable/border_light_gray_round"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -48,6 +48,7 @@
             android:ellipsize="end"
             android:maxLines="1"
             android:text="@{event.d1}"
+            android:textAlignment="center"
             android:textColor="@color/white"
             android:textSize="11sp"
             app:layout_constraintBottom_toTopOf="@+id/tv_team2"
@@ -62,6 +63,7 @@
             android:ellipsize="end"
             android:maxLines="1"
             android:text="@{event.d2}"
+            android:textAlignment="center"
             android:textColor="@color/white"
             android:textSize="11sp"
             app:layout_constraintBottom_toBottomOf="parent"

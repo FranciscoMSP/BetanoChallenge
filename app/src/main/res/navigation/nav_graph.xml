@@ -8,7 +8,7 @@
     <fragment
         android:id="@+id/FirstFragment"
         android:name="com.example.myapplication.fragments.FirstFragment"
-        android:label="@string/home"
+        android:label="@string/sports"
         tools:layout="@layout/fragment_first">
 
     </fragment>

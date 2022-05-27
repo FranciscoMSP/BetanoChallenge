@@ -21,21 +21,38 @@ import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.TimeZone;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewHolder> {
     private List<Event> events;
+    private final List<EventViewHolder> lstHolders;
     private EventsAdapter.FavoriteClick mListener;
-    private Handler handler = new Handler();
-    //private ScheduledFuture updateFuture;
+    private Handler mHandler = new Handler();
+    private Runnable updateRemainingTimeRunnable = new Runnable() {
+        @Override
+        public void run() {
+            synchronized (lstHolders) {
+                long currentTime = System.currentTimeMillis();
+                for (EventViewHolder holder : lstHolders) {
+                    holder.updateTimeRemaining(currentTime);
+                }
+            }
+        }
+    };
 
     public EventsAdapter(List<Event> events) {
         this.events = events;
+        lstHolders = new ArrayList<>();
+        startUpdateTimer();
     }
 
     @NonNull
@@ -48,6 +65,10 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
     @Override
     public void onBindViewHolder(@NonNull EventViewHolder holder, int position) {
         holder.bind(events.get(position), position);
+        synchronized (lstHolders) {
+            lstHolders.add(holder);
+        }
+        holder.updateTimeRemaining(System.currentTimeMillis());
     }
 
     @Override
@@ -72,125 +93,52 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
         }
     };
 
-    public void clearAll() {
-        handler.removeCallbacksAndMessages(null);
-    }
-
     class EventViewHolder extends RecyclerView.ViewHolder {
         private ListItemEventBinding binding;
-        CountdownRunnable countdownRunnable;
+        private Event currentEvent;
 
         EventViewHolder(@NonNull ListItemEventBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
-            countdownRunnable = new CountdownRunnable(handler, binding.tvTimer,10000);
         }
 
         void bind(Event e, int pos) {
             binding.setEvent(e);
+            currentEvent = e;
             binding.ivFavorite.setTag(pos);
             binding.ivFavorite.setOnClickListener(mOnClickListener);
+            updateTimeRemaining(System.currentTimeMillis());
+        }
 
-            //updateTimeRemaining(e.getTt(), binding.tvTimer);
+        public void updateTimeRemaining(long currentTime) {
+            long timeDiff = currentEvent.getTt() * 1000L - (currentTime);
+            if (timeDiff > 0) {
+                long secondsInMilli = 1000;
+                long minutesInMilli = secondsInMilli * 60;
+                long hoursInMilli = minutesInMilli * 60;
 
-  /*          handler.removeCallbacks(countdownRunnable);
-            countdownRunnable.holder = binding.tvTimer;
-            countdownRunnable.millisUntilFinished = e.getTt(); //because i want all timers run separately.
-            handler.postDelayed(countdownRunnable, 100);*/
+                long elapsedHours = timeDiff / hoursInMilli;
+                timeDiff = timeDiff % hoursInMilli;
 
-//            if (updateFuture == null) {
-//                final Handler mainHandler = new Handler(Looper.getMainLooper());
-//                updateFuture = Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        setDefferinceTimer(binding , e.getTt());
-//                        notifyDataSetChanged();
-//                        mainHandler.post(new Runnable() {
-//                            @Override
-//                            public void run() {
-//                                notifyDataSetChanged();
-//                            }
-//                        });
-//                    }
-//                }, 0, 1000, TimeUnit.MILLISECONDS);
-//            }
+                long elapsedMinutes = timeDiff / minutesInMilli;
+                timeDiff = timeDiff % minutesInMilli;
 
-//            if (timer != null) {
-//                timer.cancel();
-//            }
-//
-//            timer = new CountDownTimer(e.getTt(), 1000) {
-//                public void onTick(long millisUntilFinished) {
-////                    final long seconds = TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished);
-////                    final long minute = TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished);
-////                    final long hours = TimeUnit.MILLISECONDS.toHours(millisUntilFinished);
-//
-//                    int hours = (int) (millisUntilFinished / (60 * 60 * 1000));
-//                    int minutes = (int) (millisUntilFinished / (60 * 1000)) % 60;
-//                    int seconds = (int) (millisUntilFinished / 1000) % 60;
-//
-//                    SimpleDateFormat sdf = new SimpleDateFormat("HH:MM:SS");
-//
-//// Edit: setting the UTC time zone
-////                    TimeZone utc = TimeZone.getTimeZone("UTC");
-////                    sdf.setTimeZone(utc);
-//
-//                    Date date = new Date(millisUntilFinished);
-//                    //System.out.println(sdf.format(date));
-//
-//                    long diffSeconds;
-//                    long diffMinutes;
-//                    long diffHours;
-//                    diffSeconds = millisUntilFinished / 1000 % 60;
-//                    diffMinutes = millisUntilFinished / (60 * 1000) % 60;
-//                    diffHours = millisUntilFinished / (60 * 60 * 1000) % 24;
-//                    binding.tvTimer.setText(sdf.format(date)); //String.format("%02d:%02d:%02d", hours, minutes, seconds)
-//                }
-//
-//                public void onFinish() {
-//                    binding.tvTimer.setText("00:00:00");
-//                }
-//            }.start();
+                long elapsedSeconds = timeDiff / secondsInMilli;
 
-            handler.postDelayed(new UpdateTimerThread(binding, e),0);
+                binding.tvTimer.setText(String.format(Locale.ROOT, "%d:%02d:%02d", elapsedHours, elapsedMinutes, elapsedSeconds));
+            } else {
+                binding.tvTimer.setText(R.string.timer_zero);
+            }
         }
     }
 
-    private void updateTimeRemaining(long endTime, TextView yourTextView) {
-
-        long timeDiff = endTime - System.currentTimeMillis();
-        if (timeDiff > 0) {
-            int seconds = (int) (timeDiff / 1000) % 60;
-            int minutes = (int) ((timeDiff / (1000 * 60)) % 60);
-            int hours = (int) ((timeDiff / (1000 * 60 * 60)) % 24);
-
-            yourTextView.setText(MessageFormat.format("{0}:{1}:{2}", hours, minutes, seconds));
-        } else {
-            yourTextView.setText("00:00:00");
-        }
-    }
-
-    class UpdateTimerThread implements Runnable{
-        //Handler handler;
-        ListItemEventBinding binding;
-        Event event;
-
-    public UpdateTimerThread(ListItemEventBinding binding, Event event) { // , Handler handler
-            this.binding = binding;
-            this.event = event;
-            //this.handler = handler;
-        }
-        @Override
-        public void run() {
-            long countdown = event.getTt() - System.currentTimeMillis();
-            long diffSeconds;
-            long diffMinutes;
-            long diffHours;
-            diffSeconds = (int) (countdown / 1000) % 60; //countdown / 1000 % 60;
-            diffMinutes = (int) ((countdown / (1000 * 60)) % 60); //countdown / (60 * 1000) % 60;
-            diffHours = (int) ((countdown / (1000 * 60 * 60)) % 24); //countdown / (60 * 60 * 1000) % 24;
-            binding.tvTimer.setText(String.format("%04d:%02d:%02d", diffHours,   diffMinutes, diffSeconds));
-            handler.postDelayed(this,1000);
-        }
+    private void startUpdateTimer() {
+        Timer tmr = new Timer();
+        tmr.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                mHandler.post(updateRemainingTimeRunnable);
+            }
+        }, 1000, 1000);
     }
 }
