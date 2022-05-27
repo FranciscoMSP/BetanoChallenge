@@ -1,6 +1,5 @@
 package com.example.myapplication.fragments;
 
-import androidx.lifecycle.ViewModelProvider;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,10 +8,9 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.fragment.NavHostFragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import com.example.myapplication.R;
 import com.example.myapplication.activities.MainActivity;
 import com.example.myapplication.adapters.SportsAdapter;
 import com.example.myapplication.databinding.FragmentFirstBinding;
@@ -80,7 +78,7 @@ public class FirstFragment extends Fragment {
 
     //region Adapters
     private void setAdapter(List<Sport> list) {
-        sportsAdapter = new SportsAdapter(list, getContext());
+        sportsAdapter = new SportsAdapter(list);
         binding.rvSports.setLayoutManager(new LinearLayoutManager(getActivity()));
         binding.rvSports.setAdapter(sportsAdapter);
         sportsAdapter.setArrowClickListener(position -> {

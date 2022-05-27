@@ -1,43 +1,30 @@
 package com.example.myapplication.adapters;
 
-import android.os.CountDownTimer;
 import android.os.Handler;
-import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.myapplication.CountdownRunnable;
 import com.example.myapplication.R;
 import com.example.myapplication.databinding.ListItemEventBinding;
 import com.example.myapplication.models.Event;
 
-import java.text.MessageFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
 public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewHolder> {
-    private List<Event> events;
+    private final List<Event> events;
     private final List<EventViewHolder> lstHolders;
     private EventsAdapter.FavoriteClick mListener;
-    private Handler mHandler = new Handler();
-    private Runnable updateRemainingTimeRunnable = new Runnable() {
+    private final Handler mHandler = new Handler();
+    private final Runnable updateRemainingTimeRunnable = new Runnable() {
         @Override
         public void run() {
             synchronized (lstHolders) {
@@ -82,7 +69,7 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
         mListener = listener;
     }
 
-    private View.OnClickListener mOnClickListener = new View.OnClickListener() {
+    private final View.OnClickListener mOnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
             int pos = (int) view.getTag();

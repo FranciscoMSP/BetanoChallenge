@@ -1,6 +1,5 @@
 package com.example.myapplication.adapters;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,22 +11,18 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.myapplication.R;
 import com.example.myapplication.databinding.ListItemSportBinding;
-import com.example.myapplication.models.Event;
 import com.example.myapplication.models.Sport;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 public class SportsAdapter extends RecyclerView.Adapter<SportsAdapter.SportViewHolder> {
     private List<Sport> sports;
-    private Context context;
     private ArrowClick mListener;
-    private RecyclerView.RecycledViewPool viewPool = new RecyclerView.RecycledViewPool();
+    //private RecyclerView.RecycledViewPool viewPool = new RecyclerView.RecycledViewPool();
 
-    public SportsAdapter(List<Sport> sports, Context context) {
+    public SportsAdapter(List<Sport> sports) {
         this.sports = sports;
-        this.context = context;
     }
 
     @NonNull

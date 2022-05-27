@@ -1,6 +1,5 @@
 package com.example.myapplication.services;
 
-import android.app.Activity;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -24,7 +23,7 @@ public class Repository {
 
     public Repository(BaseActivity activity) {
         this.activity = activity;
-        service = RetrofitClient.getInstance(activity).getRetrofit().create(RetrofitRoutes.class);
+        service = RetrofitClient.getInstance().getRetrofit().create(RetrofitRoutes.class);
     }
 
     public LiveData<List<Sport>> getSPorts() {
